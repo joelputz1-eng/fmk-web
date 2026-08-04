@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /*
+   * Tageslicht-Variante: warmes Knochenweiss, damit die Urteilsfarben nicht
+   * auf sterilem Grau sitzen. Die Urteilsfarben sind hier abgedunkelt, sonst
+   * reisst der Kontrast auf hellem Grund.
+   */
+  :root {
+    --surface-0: 247 242 237;
+    --surface-1: 255 253 251;
+    --surface-2: 236 228 220;
+    --line: 219 206 196;
+    --text: 26 17 33;
+    --text-dim: 112 96 122;
+    --fuck: 209 24 76;
+    --marry: 158 106 8;
+    --kill: 13 112 134;
+  }
+
+  /* Nachtvariante: tiefe Pflaumen-Tinte statt neutralem Schwarz. */
+  .dark {
+    --surface-0: 20 14 28;
+    --surface-1: 31 22 45;
+    --surface-2: 45 33 64;
+    --line: 61 46 86;
+    --text: 243 235 229;
+    --text-dim: 166 149 183;
+    --fuck: 255 58 108;
+    --marry: 255 196 76;
+    --kill: 108 212 232;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface-0 font-sans text-ink antialiased;
+  }
+
+  ::selection {
+    background: rgb(var(--fuck) / 0.28);
+  }
+
+  /* Sichtbarer Tastaturfokus als Grundausstattung, nicht als Nachgedanke. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--marry));
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-surface-1;
+  }
+
+  .input {
+    @apply w-full rounded-xl border-line bg-surface-1 text-ink shadow-none
+      placeholder:text-dim focus:border-marry focus:ring-1 focus:ring-marry;
+  }
+
+  .field-label {
+    @apply mb-1.5 block font-mono text-[0.7rem] uppercase tracking-[0.18em] text-dim;
+  }
+
+  .muted {
+    @apply text-sm text-dim;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  /* Mono-Kleinkram: Zaehler, Rubriken, Datenlabels. */
+  .eyebrow {
+    @apply font-mono text-[0.7rem] uppercase tracking-[0.22em] text-dim;
+  }
+
+  .display {
+    @apply font-display uppercase leading-[0.82] tracking-[0.005em];
+  }
+
+  /*
+   * Die dreifarbige Leiste ist das wiederkehrende Strukturelement: sie sagt
+   * "drei Urteile" und taucht ueberall dort auf, wo sonst eine Trennlinie waere.
+   */
+  .spine {
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--fuck)) 0 33.333%,
+      rgb(var(--marry)) 0 66.666%,
+      rgb(var(--kill)) 0 100%
+    );
+  }
+}
+
+@layer utilities {
+  .stamp {
+    transform: rotate(var(--stamp-rot, -9deg));
+    animation: stamp-in 420ms cubic-bezier(0.2, 1.5, 0.4, 1) backwards;
+  }
+
+  .rise {
+    animation: rise-in 480ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+}
+
+/* Der Aufschlag: aus der Ferne herangeknallt, minimal ueberschossen. */
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: scale(2.3) rotate(var(--stamp-rot, -9deg));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(var(--stamp-rot, -9deg));
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
