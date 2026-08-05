@@ -157,3 +157,21 @@ bewusst *nicht* umgesetzt, gehört in eine spätere Runde:
 5. **TMDB-Logo ist derzeit ein Textlink** in den Markenfarben. Vor einem Release gehört das
    offizielle Asset aus dem TMDB-Branding-Kit nach `/public` und in die Attribution.
    Kommerzielle Nutzung bleibt genehmigungspflichtig (siehe „Open risks“ Punkt 3).
+
+---
+
+## Nachtrag Spielbildschirm mobil (Layout-Korrektur, gebaut)
+
+Offener Punkt, bewusst *nicht* in dieser Runde umgesetzt:
+
+1. **Drag & Drop funktioniert auf Touch-Geräten nicht.** `RoundCard` nutzt das HTML5-
+   Drag-and-Drop-API (`draggable` + `onDragStart`), `ActionZone` entsprechend `onDrop`.
+   Dieses API feuert auf Touch-Geräten nicht — am Handy funktioniert also ausschließlich
+   der Weg „Karte antippen, dann Aktion antippen". Als Sofortmaßnahme ist der Zieh-Hinweis
+   jetzt erst ab `sm:` sichtbar (im Hinweistext unter den Aktionszonen und im Label auf der
+   Karte selbst), damit die UI nichts verspricht, was sie dort nicht kann.
+   Eine echte Touch-Umsetzung braucht Pointer Events und eigenes Hit-Testing
+   (`elementFromPoint` o.ä.) statt der Drag-API — eigenes Vorhaben, nicht nebenbei.
+   Anmerkung: `sm:` ist ein Breiten-Breakpoint, kein Touch-Test. Ein Touch-Gerät ab 640 px
+   (Tablet) sieht den Hinweis weiterhin, obwohl Ziehen dort ebenfalls nicht geht. Sauber
+   wäre `@media (hover: none)` bzw. `pointer: coarse` — beim Umbau mitnehmen.

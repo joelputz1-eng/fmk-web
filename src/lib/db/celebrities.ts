@@ -16,8 +16,8 @@ export interface CelebrityImportInput {
   gender: Gender;
   /** Volle TMDB-Bild-URL (w500). Fehlt sie, bleibt es beim Initialen-Avatar. */
   profileUrl?: string | null;
-  /** Premade-Kategorie aus dem Department-Mapping, falls es eine passende gibt. */
-  categoryId?: string | null;
+  /** Im Import-Dialog gewaehlte Kategorien. Leer ist ausdruecklich erlaubt. */
+  categoryIds?: string[];
   note?: string;
 }
 
@@ -122,8 +122,8 @@ export async function importCelebrity(
 
   const entry = mergeEntry(input, existing, photoBlobId, now);
   void tx.objectStore('entries').put(entry);
-  if (input.categoryId) {
-    void tx.objectStore('entryCategories').put({ entryId: entry.id, categoryId: input.categoryId });
+  for (const categoryId of input.categoryIds ?? []) {
+    void tx.objectStore('entryCategories').put({ entryId: entry.id, categoryId });
   }
   for (const listId of options?.listIds ?? []) {
     void tx.objectStore('listEntries').put({ listId, entryId: entry.id });
@@ -184,10 +184,8 @@ export async function importCelebritiesBulk(
     }
     const entry = mergeEntry(input, existing, photoBlobId, now);
     void tx.objectStore('entries').put(entry);
-    if (input.categoryId) {
-      void tx
-        .objectStore('entryCategories')
-        .put({ entryId: entry.id, categoryId: input.categoryId });
+    for (const categoryId of input.categoryIds ?? []) {
+      void tx.objectStore('entryCategories').put({ entryId: entry.id, categoryId });
     }
     for (const listId of options?.listIds ?? []) {
       void tx.objectStore('listEntries').put({ listId, entryId: entry.id });

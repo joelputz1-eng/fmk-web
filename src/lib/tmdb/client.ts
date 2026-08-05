@@ -120,6 +120,10 @@ export function popularPeople(page: number) {
   return tmdbFetch<TmdbPagedResponse<TmdbPersonSummary>>('/person/popular', { page });
 }
 
+/**
+ * external_ids liefert die Wikidata-ID gratis mit — kein zusaetzlicher
+ * TMDB-Request fuer den spaeteren Kategorie-Vorschlag.
+ */
 export function personDetail(id: number) {
-  return tmdbFetch<TmdbPersonDetail>(`/person/${id}`);
+  return tmdbFetch<TmdbPersonDetail>(`/person/${id}`, { append_to_response: 'external_ids' });
 }

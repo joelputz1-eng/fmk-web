@@ -24,6 +24,7 @@ import {
 import { stashPool } from '@/lib/game/session';
 import { EntryAvatar } from '@/components/entry/EntryAvatar';
 import { Button } from '@/components/ui/Button';
+import { EntriesTabs } from '@/components/EntriesTabs';
 import { EmptyState, Loading, Notice, PageHeader } from '@/components/ui/Feedback';
 
 export default function ListDetailPage() {
@@ -183,6 +184,8 @@ export default function ListDetailPage() {
           </Link>
         }
       />
+
+      <EntriesTabs />
 
       <section>
         <h2 className="display mb-4 text-2xl">Pool bauen</h2>

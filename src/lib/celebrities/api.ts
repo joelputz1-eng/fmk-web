@@ -1,4 +1,4 @@
-import type { CelebrityPageDto, PackDto } from '@/lib/tmdb/types';
+import type { CelebrityDto, CelebrityPageDto, PackDto } from '@/lib/tmdb/types';
 
 /**
  * Clientseitiger Zugriff auf die eigenen /api/tmdb-Routen. TMDB selbst wird von
@@ -54,6 +54,15 @@ export function searchCelebrities(
 ): Promise<CelebrityPageDto> {
   const params = new URLSearchParams({ q: query, page: String(page) });
   return getJson<CelebrityPageDto>(`/api/tmdb/search?${params}`, signal);
+}
+
+/**
+ * Detail einer Person — die einzige Stelle, die den Wikidata-Kategorievorschlag
+ * mitliefert. Wird erst beim Oeffnen des Import-Dialogs geholt, nicht fuer
+ * jede Zeile der Trefferliste.
+ */
+export function fetchCelebrity(tmdbId: number, signal?: AbortSignal): Promise<CelebrityDto> {
+  return getJson<CelebrityDto>(`/api/tmdb/person/${tmdbId}`, signal);
 }
 
 export async function fetchPacks(signal?: AbortSignal): Promise<PackDto[]> {

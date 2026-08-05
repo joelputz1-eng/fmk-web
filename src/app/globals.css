@@ -99,6 +99,11 @@
 }
 
 @layer utilities {
+  /* Sonst klebt die fixierte Bottom-Bar auf dem iOS-Home-Indicator. */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .stamp {
     transform: rotate(var(--stamp-rot, -9deg));
     animation: stamp-in 420ms cubic-bezier(0.2, 1.5, 0.4, 1) backwards;

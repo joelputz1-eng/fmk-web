@@ -13,6 +13,7 @@ import {
 import { countEntriesPerList, createList, deleteList, listLists, renameList } from '@/lib/db/lists';
 import type { CategoryRecord, ListRecord } from '@/lib/db/schema';
 import { Button } from '@/components/ui/Button';
+import { EntriesTabs } from '@/components/EntriesTabs';
 import { EmptyState, Loading, PageHeader } from '@/components/ui/Feedback';
 
 export default function ListsPage() {
@@ -103,6 +104,8 @@ export default function ListsPage() {
           title="Listen"
           subtitle="Ein Eintrag kann in mehreren Listen sein."
         />
+
+        <EntriesTabs />
 
         <div className="card mb-4 flex gap-2 p-3">
           <input

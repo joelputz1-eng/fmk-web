@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CelebrityApiError,
+  fetchCelebrity,
   fetchPack,
   fetchPacks,
   isSetupError,
   searchCelebrities,
 } from '@/lib/celebrities/api';
+import { listCategories } from '@/lib/db/categories';
 import {
   getImportedTmdbIds,
   importCelebritiesBulk,
@@ -15,11 +17,12 @@ import {
   type CelebrityImportInput,
 } from '@/lib/db/celebrities';
 import { createList, listLists } from '@/lib/db/lists';
-import type { ListRecord } from '@/lib/db/schema';
+import type { CategoryRecord, ListRecord } from '@/lib/db/schema';
 import type { CelebrityDto, PackDto } from '@/lib/tmdb/types';
 import { CelebrityCard } from '@/components/celebrities/CelebrityCard';
 import { ImportSheet } from '@/components/celebrities/ImportSheet';
 import { Button } from '@/components/ui/Button';
+import { EntriesTabs } from '@/components/EntriesTabs';
 import { EmptyState, Loading, Notice, PageHeader } from '@/components/ui/Feedback';
 
 type Tab = 'search' | 'packs';
@@ -50,13 +53,13 @@ const EMPTY_FEED: Feed = {
   error: null,
 };
 
-function toImportInput(celebrity: CelebrityDto): CelebrityImportInput {
+function toImportInput(celebrity: CelebrityDto, categoryIds: string[]): CelebrityImportInput {
   return {
     tmdbId: celebrity.tmdbId,
     name: celebrity.name,
     gender: celebrity.gender,
     profileUrl: celebrity.profileUrl,
-    categoryId: celebrity.categoryId,
+    categoryIds,
   };
 }
 
@@ -80,6 +83,7 @@ export default function CelebritiesPage() {
   const [tab, setTab] = useState<Tab>('search');
 
   const [lists, setLists] = useState<ListRecord[]>([]);
+  const [categories, setCategories] = useState<CategoryRecord[]>([]);
   const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
   const [lastListIds, setLastListIds] = useState<string[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -95,6 +99,11 @@ export default function CelebritiesPage() {
   const [packFeed, setPackFeed] = useState<Feed>(EMPTY_FEED);
 
   const [pending, setPending] = useState<{ items: CelebrityDto[]; title: string } | null>(null);
+  /** Wikidata-Kategorievorschlag fuer den Einzelimport; beim Pack immer leer. */
+  const [suggestion, setSuggestion] = useState<{ categoryId: string | null; loading: boolean }>({
+    categoryId: null,
+    loading: false,
+  });
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [sheetError, setSheetError] = useState<string | null>(null);
@@ -103,13 +112,43 @@ export default function CelebritiesPage() {
   // Laufende Requests abbrechen, wenn Query/Pack wechselt.
   const searchAbort = useRef<AbortController | null>(null);
   const packAbort = useRef<AbortController | null>(null);
+  const suggestAbort = useRef<AbortController | null>(null);
 
   const reloadLocalState = useCallback(async () => {
-    const [loadedLists, loadedIds] = await Promise.all([listLists(), getImportedTmdbIds()]);
+    const [loadedLists, loadedCategories, loadedIds] = await Promise.all([
+      listLists(),
+      listCategories(),
+      getImportedTmdbIds(),
+    ]);
     setLists(loadedLists);
+    setCategories(loadedCategories);
     setImportedIds(loadedIds);
     return loadedLists;
   }, []);
+
+  /**
+   * Der Dialog geht sofort auf; der Beruf wird nebenher geholt. Faellt Wikidata
+   * aus, bleibt es schlicht bei "kein Vorschlag" — kein Banner, kein Blockieren.
+   */
+  const loadSuggestion = (celebrity: CelebrityDto) => {
+    suggestAbort.current?.abort();
+    const controller = new AbortController();
+    suggestAbort.current = controller;
+    setSuggestion({ categoryId: null, loading: true });
+
+    fetchCelebrity(celebrity.tmdbId, controller.signal)
+      .then((detail) => setSuggestion({ categoryId: detail.suggestedCategoryId, loading: false }))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setSuggestion({ categoryId: null, loading: false });
+      });
+  };
+
+  const closeSheet = () => {
+    suggestAbort.current?.abort();
+    setPending(null);
+    setSuggestion({ categoryId: null, loading: false });
+  };
 
   useEffect(() => {
     reloadLocalState()
@@ -248,12 +287,12 @@ export default function CelebritiesPage() {
     setPackFeed(EMPTY_FEED);
   };
 
-  const handleConfirmImport = async (listIds: string[]) => {
+  const handleConfirmImport = async (listIds: string[], categoryIds: string[]) => {
     if (!pending) return;
     setImporting(true);
     setSheetError(null);
     try {
-      const inputs = pending.items.map(toImportInput);
+      const inputs = pending.items.map((item) => toImportInput(item, categoryIds));
       let photoFailures = 0;
 
       if (inputs.length === 1) {
@@ -283,7 +322,7 @@ export default function CelebritiesPage() {
           listNames ? ` → ${listNames}` : ''
         }${photoFailures > 0 ? ` (${photoFailures}× ohne Foto)` : ''}.`,
       );
-      setPending(null);
+      closeSheet();
     } catch (error) {
       console.error('Import fehlgeschlagen', error);
       setSheetError('Der Import ist fehlgeschlagen. Bitte nochmal versuchen.');
@@ -315,6 +354,7 @@ export default function CelebritiesPage() {
             setSheetError(null);
             setStatus(null);
             setPending({ items: [celebrity], title: celebrity.name });
+            loadSuggestion(celebrity);
           }}
         />
       ))}
@@ -328,6 +368,8 @@ export default function CelebritiesPage() {
         title="Promis"
         subtitle="Prominente suchen oder in Packs stöbern und in eigene Listen übernehmen."
       />
+
+      <EntriesTabs />
 
       {dbError ? (
         <div className="mb-4">
@@ -449,6 +491,8 @@ export default function CelebritiesPage() {
                   onClick={() => {
                     setSheetError(null);
                     setStatus(null);
+                    // Pack-Import fragt bewusst kein Wikidata — kein Vorschlag.
+                    setSuggestion({ categoryId: null, loading: false });
                     setPending({
                       items: packImportable,
                       title: `${activePack.name}: ${packImportable.length} Personen`,
@@ -502,10 +546,17 @@ export default function CelebritiesPage() {
           subtitle={
             pending.items.length === 1
               ? 'In welche Liste soll die Person?'
-              : `${pending.items.length} Personen übernehmen — Bilder werden dabei lokal gespeichert.`
+              : /* Ehrlich statt stillschweigend anders: beim Pack fragt die App
+                 * keine Berufe ab — das waeren zu viele Requests auf einmal. */
+                `${pending.items.length} Personen übernehmen — Bilder werden lokal gespeichert. ` +
+                'Kategorien vergibt der Pack-Import keine; die lassen sich später unter Einträge ergänzen.'
           }
           lists={lists}
           defaultListIds={lastListIds}
+          categories={categories}
+          allowCategories={pending.items.length === 1}
+          suggestedCategoryId={suggestion.categoryId}
+          suggestionPending={suggestion.loading}
           busy={importing}
           progress={progress}
           error={sheetError}
@@ -514,12 +565,13 @@ export default function CelebritiesPage() {
             await reloadLocalState();
             return list;
           }}
+          onCategoryCreated={(category) => setCategories((prev) => [...prev, category])}
           onCancel={() => {
             if (importing) return;
-            setPending(null);
+            closeSheet();
             setSheetError(null);
           }}
-          onConfirm={(listIds) => void handleConfirmImport(listIds)}
+          onConfirm={(listIds, categoryIds) => void handleConfirmImport(listIds, categoryIds)}
         />
       ) : null}
 

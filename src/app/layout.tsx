@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Anton, JetBrains_Mono, Manrope } from 'next/font/google';
+import { BottomNav } from '@/components/BottomNav';
 import { Nav } from '@/components/Nav';
 import { SettingsProvider } from '@/lib/theme/SettingsProvider';
 import { themeInitScript } from '@/lib/theme/themeScript';
@@ -32,6 +33,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // Ohne 'cover' liefert env(safe-area-inset-bottom) auf iOS konstant 0.
+  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f7f2ed' },
     { media: '(prefers-color-scheme: dark)', color: '#140e1c' },
@@ -53,7 +56,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SettingsProvider>
           <div className="min-h-screen">
             <Nav />
-            <main className="mx-auto w-full max-w-4xl px-4 py-8 pb-24">{children}</main>
+            {/*
+             * Unterhalb md liegt die BottomNav ueber dem Inhalt — der Abstand
+             * haelt die letzte Zeile jeder Seite frei. Ab md gilt wieder der
+             * bisherige Seitenabstand.
+             */}
+            <main className="mx-auto w-full max-w-4xl px-4 pt-8 pb-[calc(4.5rem_+_env(safe-area-inset-bottom))] md:pb-24">
+              {children}
+            </main>
+            <BottomNav />
           </div>
         </SettingsProvider>
       </body>

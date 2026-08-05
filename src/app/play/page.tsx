@@ -183,24 +183,32 @@ export default function PlayPage() {
   const combos = totalTriples(pool.length);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <header>
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="min-w-0">
-            <p className="eyebrow mb-2 truncate">{pending?.descriptor ?? 'Alle Einträge'}</p>
-            <h1 className="display text-4xl sm:text-5xl">Runde {roundNumber + 1}</h1>
+          {/*
+           * Am Handy stehen Rundennummer und Descriptor nebeneinander in einer
+           * Zeile (flex-row-reverse dreht die DOM-Reihenfolge um), ab sm wieder
+           * Descriptor ueber der Ueberschrift.
+           */}
+          <div className="flex min-w-0 flex-row-reverse items-baseline justify-end gap-2 sm:flex-col sm:items-start sm:gap-0">
+            <p className="eyebrow min-w-0 truncate sm:mb-2">
+              {pending?.descriptor ?? 'Alle Einträge'}
+            </p>
+            <h1 className="display shrink-0 text-xl sm:text-5xl">Runde {roundNumber + 1}</h1>
           </div>
           <button
             type="button"
             onClick={() => void update({ soundEnabled: !settings.soundEnabled })}
             aria-pressed={settings.soundEnabled}
-            className="rounded-xl border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-[0.18em] text-dim transition hover:bg-surface-2 hover:text-ink"
+            className="rounded-xl border border-line px-2 py-1 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-dim transition hover:bg-surface-2 hover:text-ink sm:px-3 sm:py-1.5 sm:text-xs"
           >
             Ton {settings.soundEnabled ? 'an' : 'aus'}
           </button>
         </div>
-        <div className="spine mt-4 rounded-full" />
-        <p className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-dim">
+        {/* Spine und Statistik sind am Handy den Platz nicht wert. */}
+        <div className="spine mt-4 hidden rounded-full sm:block" />
+        <p className="mt-3 hidden font-mono text-xs uppercase tracking-[0.18em] text-dim sm:block">
           <span className="text-ink">{pool.length}</span> im Pool
           <span className="mx-2 text-line">/</span>
           <span className="text-ink">{usedCount}</span> von {combos} Kombinationen gespielt
@@ -209,7 +217,8 @@ export default function PlayPage() {
 
       {loadError ? <Notice tone="error">{loadError}</Notice> : null}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      {/* Drei Personen vergleicht man nebeneinander — auch auf 360 px. */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {triple.map((entry) => {
           const verdict = VERDICTS.find((value) => assignments[value] === entry.id) ?? null;
           return (
@@ -247,20 +256,44 @@ export default function PlayPage() {
         })}
       </div>
 
+      {/*
+       * Ziehen ist HTML5-Drag-and-Drop und feuert auf Touch-Geraeten nicht —
+       * der Hinweis darf dort also gar nicht erst auftauchen.
+       */}
       <p className="eyebrow text-center">
-        Karte antippen, dann Aktion wählen — oder Karte auf die Aktion ziehen
+        Karte antippen, dann Aktion wählen
+        <span className="hidden sm:inline"> — oder Karte auf die Aktion ziehen</span>
       </p>
 
-      <div className="flex flex-wrap gap-2">
-        <Button size="lg" disabled={!allAssigned || saving} onClick={() => void complete()}>
+      {/* Am Handy: primaer volle Breite, die beiden Nebenaktionen darunter. */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <Button
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={!allAssigned || saving}
+          onClick={() => void complete()}
+        >
           {saving ? 'Speichert …' : 'Runde abschließen'}
         </Button>
-        <Button variant="secondary" onClick={undo} disabled={undoStack.length === 0}>
-          Rückgängig
-        </Button>
-        <Button variant="secondary" onClick={() => startRound(pool)}>
-          Neu mischen
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            className="flex-1 sm:flex-none"
+            onClick={undo}
+            disabled={undoStack.length === 0}
+          >
+            <span className="sm:hidden">Zurück</span>
+            <span className="hidden sm:inline">Rückgängig</span>
+          </Button>
+          <Button
+            variant="secondary"
+            className="flex-1 sm:flex-none"
+            onClick={() => startRound(pool)}
+          >
+            <span className="sm:hidden">Mischen</span>
+            <span className="hidden sm:inline">Neu mischen</span>
+          </Button>
+        </div>
       </div>
     </div>
   );

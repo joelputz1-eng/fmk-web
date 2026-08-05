@@ -21,6 +21,13 @@ export interface TmdbPersonDetail extends TmdbPersonSummary {
   deathday: string | null;
   place_of_birth: string | null;
   biography: string;
+  /**
+   * Nur vorhanden, wenn append_to_response=external_ids mitgegeben wurde.
+   * `wikidata_id` fehlt bei vielen Personen — beides deshalb optional.
+   */
+  external_ids?: {
+    wikidata_id?: string | null;
+  };
 }
 
 export interface TmdbPagedResponse<T> {
@@ -37,8 +44,12 @@ export interface CelebrityDto {
   gender: 'male' | 'female' | 'nonbinary' | 'unspecified';
   /** z.B. "Schauspiel" — schon uebersetzt, der Client formatiert nichts nach. */
   knownFor: string | null;
-  /** Premade-Kategorie-ID oder null, wenn das Department zu keiner passt. */
-  categoryId: string | null;
+  /**
+   * Kategorie-*Vorschlag* aus dem Wikidata-Beruf, oder null wenn unbekannt.
+   * Nur die Detail-Route fuellt das; in Trefferlisten steht hier immer null,
+   * weil dort kein Wikidata gefragt wird.
+   */
+  suggestedCategoryId: string | null;
   birthYear: number | null;
   /** w185 fuers Grid — wird direkt als <img src> gehaengt, nie gespeichert. */
   thumbUrl: string | null;

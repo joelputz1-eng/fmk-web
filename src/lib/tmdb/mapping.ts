@@ -38,24 +38,9 @@ const DEPARTMENT_LABELS: Record<string, string> = {
   Crew: 'Crew',
 };
 
-/**
- * Nur zwei Departments lassen sich ehrlich auf eine Premade-Kategorie abbilden.
- * Regie/Produktion sind keine Schauspieler — die bekommen lieber gar keine
- * Kategorie, als in "Actors" einsortiert zu werden.
- */
-const DEPARTMENT_CATEGORIES: Record<string, string> = {
-  Acting: 'premade-actors',
-  Sound: 'premade-musicians',
-};
-
 export function departmentLabel(department: string | null): string | null {
   if (!department) return null;
   return DEPARTMENT_LABELS[department] ?? department;
-}
-
-export function departmentCategoryId(department: string | null): string | null {
-  if (!department) return null;
-  return DEPARTMENT_CATEGORIES[department] ?? null;
 }
 
 function birthYear(birthday: string | null): number | null {
@@ -69,7 +54,10 @@ export function toCelebrityDto(detail: TmdbPersonDetail): CelebrityDto {
     name: detail.name,
     gender: mapGender(detail.gender),
     knownFor: departmentLabel(detail.known_for_department),
-    categoryId: departmentCategoryId(detail.known_for_department),
+    // Bewusst immer null: known_for_department beschreibt die Rolle in einer
+    // Filmproduktion, nicht den Beruf. Ronaldo stand darueber auf "Acting".
+    // Den Vorschlag setzt allein die Detail-Route aus dem Wikidata-Beruf.
+    suggestedCategoryId: null,
     birthYear: birthYear(detail.birthday),
     thumbUrl: profileImageUrl(detail.profile_path, 'w185'),
     profileUrl: profileImageUrl(detail.profile_path, 'w500'),

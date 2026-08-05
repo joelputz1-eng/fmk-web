@@ -18,6 +18,7 @@ import {
 } from '@/lib/game/poolBuilder';
 import { EntryAvatar } from '@/components/entry/EntryAvatar';
 import { Button } from '@/components/ui/Button';
+import { EntriesTabs } from '@/components/EntriesTabs';
 import { EmptyState, Loading, PageHeader } from '@/components/ui/Feedback';
 
 type SortMode = 'name' | 'recent' | 'played';
@@ -131,6 +132,8 @@ export default function EntriesPage() {
           </Link>
         }
       />
+
+      <EntriesTabs />
 
       <div className="card mb-4 space-y-3 p-3">
         <input
