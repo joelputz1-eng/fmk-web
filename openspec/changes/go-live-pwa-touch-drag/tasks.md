@@ -34,9 +34,9 @@
 
 - [x] 5.1 *(braucht deinen Account)* Vercel-Projekt mit dem Repository verbinden. Prüfen: Ein Push erzeugt ein Preview-Deployment.
 - [x] 5.2 *(braucht deinen Account)* `TMDB_API_KEY` in den Vercel-Projekteinstellungen hinterlegen. Prüfen: Die Promi-Suche liefert im Preview Ergebnisse.
-- [ ] 5.3 Preview-Deployment abnehmen: HTTPS und HTTP-Weiterleitung, `/robots.txt`, Promi-Suche, Installation am Handy. Prüfen: alle vier Punkte bestätigt.
-- [ ] 5.4 Nach dem Schlüsselwert in den ausgelieferten Bundles suchen. Prüfen: kein Treffer im HTML und in keinem JavaScript-Bundle.
-- [ ] 5.5 Auf Produktion befördern und die Adresse notieren. Prüfen: Die Produktionsadresse zeigt dieselbe Fassung wie das abgenommene Preview.
+- [ ] 5.3 Deployment abnehmen: HTTPS und HTTP-Weiterleitung, `/robots.txt`, Promi-Suche, Installation am Handy. Prüfen: alle vier Punkte bestätigt. — Gegen die Produktion statt gegen ein Preview geprüft (Previews liegen hinter Vercels Login). Drei Punkte belegt; die Installation am Handy fehlt noch, siehe 6.1.
+- [x] 5.4 Nach dem Schlüsselwert in den ausgelieferten Bundles suchen. Prüfen: kein Treffer im HTML und in keinem JavaScript-Bundle.
+- [x] 5.5 Auf Produktion befördern und die Adresse notieren. Prüfen: Die Produktionsadresse zeigt dieselbe Fassung wie das abgenommene Preview.
 
 ## 6. Abnahme am Gerät
 

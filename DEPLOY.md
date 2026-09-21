@@ -8,6 +8,8 @@ Gehostet wird auf **Vercel**. Alle Spieldaten liegen in IndexedDB im Browser der
 Nutzenden; es gibt keine Datenbank, keinen Server-State und folglich auch keine
 Migration beim Deployen.
 
+**Produktion:** https://fmk-web-navy.vercel.app
+
 ## Einmalig einrichten
 
 1. Auf [vercel.com](https://vercel.com) ein Projekt anlegen und dieses
