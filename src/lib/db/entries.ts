@@ -165,7 +165,12 @@ export async function restoreEntry(id: string): Promise<void> {
   await db.put('entries', { ...current, deletedAt: null, updatedAt: nowIso() });
 }
 
-function normalizeName(name: string): string {
+/**
+ * Exportiert, damit der Listen-Import (listImport.ts) denselben Massstab
+ * anlegt wie die Duplikat-Warnung. Zwei Stellen mit eigener Meinung darueber,
+ * was derselbe Mensch ist, waere die schlimmere Variante.
+ */
+export function normalizeName(name: string): string {
   return name.trim().toLocaleLowerCase('de');
 }
 

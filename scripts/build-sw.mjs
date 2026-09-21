@@ -20,7 +20,18 @@ const TEMPLATE = 'scripts/sw.template.js';
 const OUTPUT = 'public/sw.js';
 
 /** Vom Nutzer erreichbare Seiten. Die HTML-Antworten selbst. */
-const ROUTES = ['/', '/play', '/entries', '/lists', '/celebrities', '/history', '/settings'];
+const ROUTES = [
+  '/',
+  '/play',
+  '/entries',
+  '/lists',
+  // Ein geteilter Link landet hier. Ohne diese Zeile fiele er offline auf die
+  // Startseite zurueck, und das Fragment waere verloren.
+  '/lists/import',
+  '/celebrities',
+  '/history',
+  '/settings',
+];
 
 /** Statische Dateien, die nicht im Build-Manifest stehen. */
 const STATIC_FILES = [
