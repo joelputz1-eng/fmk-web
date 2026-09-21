@@ -5,11 +5,14 @@ import type { Verdict } from '@/lib/db/schema';
  * als Vollfläche hinter Text. Sonst müsste die Textfarbe zwischen Hell- und
  * Dunkelmodus kippen, weil Gold und Eisblau helle, Rot dunkle Schrift braucht.
  *
+ * Einzige Ausnahme ist `solid`: der gestapelte Balken im Verlauf ist reine
+ * Fläche ohne Text darauf, da kippt nichts.
+ *
  * Klassennamen bewusst als Literale — Tailwind muss sie statisch finden können.
  */
 export const VERDICT_THEME: Record<
   Verdict,
-  { text: string; border: string; tint: string; tintStrong: string; ring: string }
+  { text: string; border: string; tint: string; tintStrong: string; ring: string; solid: string }
 > = {
   fuck: {
     text: 'text-fuck',
@@ -17,6 +20,7 @@ export const VERDICT_THEME: Record<
     tint: 'bg-fuck/[0.07]',
     tintStrong: 'bg-fuck/[0.16]',
     ring: 'ring-fuck',
+    solid: 'bg-fuck',
   },
   marry: {
     text: 'text-marry',
@@ -24,6 +28,7 @@ export const VERDICT_THEME: Record<
     tint: 'bg-marry/[0.07]',
     tintStrong: 'bg-marry/[0.16]',
     ring: 'ring-marry',
+    solid: 'bg-marry',
   },
   kill: {
     text: 'text-kill',
@@ -31,6 +36,7 @@ export const VERDICT_THEME: Record<
     tint: 'bg-kill/[0.07]',
     tintStrong: 'bg-kill/[0.16]',
     ring: 'ring-kill',
+    solid: 'bg-kill',
   },
 };
 
