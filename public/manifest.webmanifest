@@ -1,0 +1,32 @@
+{
+  "name": "Fuck Marry Kill",
+  "short_name": "FMK",
+  "description": "Fuck Marry Kill — lokal im Browser, ohne Konto und ohne Server.",
+  "lang": "de",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#140e1c",
+  "theme_color": "#140e1c",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

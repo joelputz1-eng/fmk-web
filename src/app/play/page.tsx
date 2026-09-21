@@ -14,7 +14,9 @@ import { DEFAULT_POOL_CONFIG, MIN_POOL_SIZE, resolvePool } from '@/lib/game/pool
 import { drawTriple, totalTriples } from '@/lib/game/roundGenerator';
 import { readPool, type PendingPool } from '@/lib/game/session';
 import { useSettings, useVerdictLabels } from '@/lib/theme/SettingsProvider';
+import type { DragState } from '@/lib/game/dragAssignment';
 import { ActionZone } from '@/components/game/ActionZone';
+import { DragGhost } from '@/components/game/DragGhost';
 import { ResultScreen } from '@/components/game/ResultScreen';
 import { RoundCard } from '@/components/game/RoundCard';
 import { Button } from '@/components/ui/Button';
@@ -38,6 +40,9 @@ export default function PlayPage() {
   const [assignments, setAssignments] = useState<Assignments>(EMPTY_ASSIGNMENTS);
   const [undoStack, setUndoStack] = useState<Assignments[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Die Ziehgeste lebt hier, nicht in der Karte: das Abbild muss ueber allem
+  // liegen, und die Aktionszonen muessen wissen, wer gerade Ziel ist.
+  const [drag, setDrag] = useState<DragState | null>(null);
   const [result, setResult] = useState<Record<Verdict, EntryRecord> | null>(null);
   const [roundNumber, setRoundNumber] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -180,6 +185,8 @@ export default function PlayPage() {
   }
 
   const allAssigned = VERDICTS.every((verdict) => assignments[verdict] !== null);
+  const draggedEntry =
+    drag?.isDragging === true ? (triple.find((entry) => entry.id === drag.entryId) ?? null) : null;
   const combos = totalTriples(pool.length);
 
   return (
@@ -228,9 +235,12 @@ export default function PlayPage() {
               selected={selectedId === entry.id}
               verdict={verdict}
               verdictLabel={verdict ? labels[verdict] : null}
+              dragging={drag?.isDragging === true && drag.entryId === entry.id}
               onSelect={() =>
                 setSelectedId((current) => (current === entry.id ? null : entry.id))
               }
+              onDragChange={setDrag}
+              onAssign={(value) => assign(value, entry.id)}
             />
           );
         })}
@@ -245,24 +255,23 @@ export default function PlayPage() {
               verdict={verdict}
               label={labels[verdict]}
               assigned={triple.find((entry) => entry.id === assignedId) ?? null}
-              armed={selectedId !== null}
+              // Waehrend einer Geste zaehlt nur die Zone unter dem Zeiger:
+              // saehen alle drei gleichzeitig scharf aus, waere das Ziel nicht
+              // mehr zu erkennen.
+              armed={selectedId !== null && drag?.isDragging !== true}
+              isDropTarget={drag?.isDragging === true && drag.target === verdict}
               onTap={() => {
                 if (selectedId) assign(verdict, selectedId);
                 else clearZone(verdict);
               }}
-              onDropEntry={(entryId) => assign(verdict, entryId)}
             />
           );
         })}
       </div>
 
-      {/*
-       * Ziehen ist HTML5-Drag-and-Drop und feuert auf Touch-Geraeten nicht —
-       * der Hinweis darf dort also gar nicht erst auftauchen.
-       */}
+      {/* Beide Wege gehen auf jedem Geraet — der Hinweis nennt deshalb beide. */}
       <p className="eyebrow text-center">
-        Karte antippen, dann Aktion wählen
-        <span className="hidden sm:inline"> — oder Karte auf die Aktion ziehen</span>
+        Karte antippen, dann Aktion wählen — oder Karte auf die Aktion ziehen
       </p>
 
       {/* Am Handy: primaer volle Breite, die beiden Nebenaktionen darunter. */}
@@ -295,6 +304,8 @@ export default function PlayPage() {
           </Button>
         </div>
       </div>
+
+      {draggedEntry && drag ? <DragGhost entry={draggedEntry} x={drag.x} y={drag.y} /> : null}
     </div>
   );
 }

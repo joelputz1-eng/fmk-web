@@ -8,6 +8,9 @@ next-env.d.ts
 .env.local
 .env*.local
 
+# Wird von scripts/build-sw.mjs bei jedem Build erzeugt.
+public/sw.js
+
 *.tsbuildinfo
 .DS_Store
 npm-debug.log*

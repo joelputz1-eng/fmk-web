@@ -29,7 +29,12 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
     response = await fetch(url, { signal });
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
-    throw new CelebrityApiError('network', 'Keine Verbindung zum Server.');
+    // Offline ist der Normalfall dieser Meldung, nicht die Ausnahme: die App
+    // laeuft als installierte PWA weiter, nur TMDB ist dann nicht erreichbar.
+    throw new CelebrityApiError(
+      'network',
+      'Keine Verbindung. Für Promis braucht die App Netz — deine eigenen Einträge und bereits übernommene Promis funktionieren weiter.',
+    );
   }
 
   if (!response.ok) {
